@@ -44,8 +44,10 @@ session = scoped_session(
 SWAGGER_URL = "/api/v1/docs"
 API_URL = "/static/swagger.json"
 from urls.users import bp  # noqa
+from urls.journal import journal_bp #noqa
 
 app.register_blueprint(bp, url_prefix="/api/v1/authentication")
+app.register_blueprint(journal_bp, url_prefix="/api/v1/journal")
 
 
 from models.models import db  # noqa
