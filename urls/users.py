@@ -9,7 +9,7 @@ bp = Blueprint("auth", __name__)
 
 
 # Customer register
-@bp.route("/register", methods=["POST"])
+@bp.route("/signup", methods=["POST"])
 def register():
     return Users().register()
 

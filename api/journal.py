@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import exc
 from flask import request, jsonify
-from models.models import Journal, Category, User
+from models.models import Journal, Category
 from sqlalchemy.orm import joinedload
 from .schema import (
     JournalSchema,
@@ -57,7 +57,7 @@ class JournalHandler:
             return jsonify({"error": error_messages}), 400
         title = validated_data["name"]
         journal = Category(
-            title=title,
+            name=title,
             user_id=user_id,
         )
         try:
@@ -78,7 +78,7 @@ class JournalHandler:
 
     def update_journal_entry(self, user_id, journal_id):
         data = request.get_json()
-        validated_data, error_messages = self.journ_upd_schema.serialize_user_data(
+        validated_data, error_messages = self.journ_upd_schema.serialize_data(
             data
         )  # Noqa
         if error_messages:
@@ -142,17 +142,17 @@ class JournalHandler:
             journals = (
                 session.query(Journal)
                 .filter_by(user_id=user_id)
-                .options(joinedload(Category.category))
+                .options(joinedload(Journal.category))
                 .all()
             )
             journal_entries = []
             for journal in journals:
                 message = {
-                    "message": {
-                        "title": journal.title,
-                        "category": journal.category.name,
-                        "content": journal.content,
-                    }
+                    "id": journal.id,
+                    "title": journal.title,
+                    "category": journal.category.name,
+                    "content": journal.content,
+                    "date": journal.date_created,
                 }
                 journal_entries.append(message)
             return jsonify({"message": journal_entries}), 200
@@ -161,18 +161,20 @@ class JournalHandler:
 
     def fetch_journal(user_id, journal_id):
         try:
+            print("rrrr",user_id,journal_id)
             journal = (
                 session.query(Journal)
                 .filter_by(id=journal_id, user_id=user_id)
-                .options(joinedload(Category.category))
+                .options(joinedload(Journal.category))
                 .first()
             )
             message = {
-                "message": {
-                    "title": journal.title,
-                    "category": journal.category.name,
-                    "content": journal.content,
-                }
+                "id": journal.id,
+                "title": journal.title,
+                "category": journal.category.name,
+                "category_id": journal.category.id,
+                "content": journal.content,
+                "date": journal.date_created,
             }
             return jsonify({"message": message}), 200
         finally:
@@ -206,9 +208,8 @@ class JournalHandler:
             category_entries = []
             for category in categories:
                 message = {
-                    "message": {
-                        "name": category.name,
-                    }
+                    "id": category.id,
+                    "name": category.name,
                 }
                 category_entries.append(message)
             return jsonify({"message": category_entries}), 200
@@ -221,7 +222,7 @@ class JournalHandler:
         message = {"message": "journal deleted successfully"}
         return jsonify(message), 200
 
- #  TODO:handle error emerging after a user deletes a category
+    #  TODO:handle error emerging after a user deletes a category
     def delete_category(user_id, category_id):
         session.query(Category).filter_by(id=category_id, user_id=user_id).delete()
         session.commit()

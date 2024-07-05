@@ -44,7 +44,7 @@ def update_category(category_id):
 def fetch_journals():
     current_identity = get_jwt_identity()
     user_id = current_identity["id"]
-    return JournalHandler().fetch_journals(user_id)
+    return JournalHandler.fetch_journals(user_id)
 
 
 @journal_bp.route("/<journal_id>", methods=["GET"])
@@ -52,7 +52,7 @@ def fetch_journals():
 def fetch_journal(journal_id):
     current_identity = get_jwt_identity()
     user_id = current_identity["id"]
-    return JournalHandler().fetch_journal(user_id, journal_id)
+    return JournalHandler.fetch_journal(user_id, journal_id)
 
 
 @journal_bp.route("/category/<category_id>", methods=["GET"])
@@ -60,7 +60,7 @@ def fetch_journal(journal_id):
 def fetch_journal_by_category(category_id):
     current_identity = get_jwt_identity()
     user_id = current_identity["id"]
-    return JournalHandler().fetch_journal_by_category(user_id, category_id)
+    return JournalHandler.fetch_journal_by_category(user_id, category_id)
 
 
 @journal_bp.route("/category", methods=["GET"])
@@ -68,7 +68,7 @@ def fetch_journal_by_category(category_id):
 def fetch_categories():
     current_identity = get_jwt_identity()
     user_id = current_identity["id"]
-    return JournalHandler().fetch_category_details(user_id)
+    return JournalHandler.fetch_category_details(user_id)
 
 
 @journal_bp.route("/<journal_id>", methods=["DELETE"])
@@ -76,7 +76,7 @@ def fetch_categories():
 def delete_journal(journal_id):
     current_identity = get_jwt_identity()
     user_id = current_identity["id"]
-    return JournalHandler().delete_journal(user_id, journal_id)
+    return JournalHandler.delete_journal(user_id, journal_id)
 
 
 @journal_bp.route("/category/<category_id>", methods=["DELETE"])

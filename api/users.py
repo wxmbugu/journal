@@ -81,7 +81,6 @@ class Users:
                     "access_token": access_token,
                     "refresh_token": refresh_token,
                     "user_id": user.id,
-                    "user_type": user.user_type,
                     "user_email": user.email,
                 }
                 return jsonify(message), 200
@@ -174,7 +173,7 @@ class Users:
         finally:
             session.close()
 
-    def register(self ):
+    def register(self):
         data = request.get_json()
         validated_data, error_messages = self.reg_schema.serialize_register_data(data)
         if error_messages:
@@ -182,7 +181,6 @@ class Users:
         email = validated_data["email"]
         username = validated_data["username"]
         password = validated_data["password"]
-        profile_data = validated_data["profile"]
         password_hash = bcrypt.generate_password_hash(password)
         code = verification_code()
         encrypted_code = encode_verification_key(code)
@@ -199,7 +197,7 @@ class Users:
             session.commit()
             email_worker = Worker(
                 callback_fn=lambda: send_account_verification_emails(
-                    user.email, profile_data["first_name"], verification_link
+                    user.email, user.username, verification_link
                 )
             )
             email_worker.start()

@@ -31,7 +31,7 @@ class Category(db.Model):
     user_id = db.Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    user = relationship("User", backref="journal")
+    user = relationship("User", backref="categories")
     name = db.Column(String(80), nullable=True)
 
 

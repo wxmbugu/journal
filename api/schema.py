@@ -87,7 +87,7 @@ class CategorySchema(Schema):
 
 
 class JournalSchema(Schema):
-    title = fields.Email(required=True)
+    title = fields.Str(required=True)
     content = fields.Str(required=True)
     category_id = fields.Integer()
 
@@ -100,7 +100,7 @@ class JournalSchema(Schema):
 
 
 class JournalUpdateSchema(Schema):
-    title = fields.Email()
+    title = fields.Str()
     content = fields.Str()
     category_id = fields.Integer()
 
