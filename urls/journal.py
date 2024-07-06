@@ -84,4 +84,4 @@ def delete_journal(journal_id):
 def delete_category(category_id):
     current_identity = get_jwt_identity()
     user_id = current_identity["id"]
-    return JournalHandler().delete_category(user_id, category_id)
+    return JournalHandler.delete_category(user_id, category_id)

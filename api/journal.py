@@ -101,7 +101,7 @@ class JournalHandler:
             return jsonify({"error": e}), 400
         if journal is None:
             message = {"error": "Journal not Found"}
-            return jsonify(message), 401
+            return jsonify(message), 404
         else:
             session.flush()
             session.commit()
@@ -129,7 +129,7 @@ class JournalHandler:
             return jsonify({"error": e}), 400
         if category is None:
             message = {"error": "category not found"}
-            return jsonify(message), 401
+            return jsonify(message), 404
         else:
             session.flush()
             session.commit()
@@ -161,13 +161,14 @@ class JournalHandler:
 
     def fetch_journal(user_id, journal_id):
         try:
-            print("rrrr",user_id,journal_id)
             journal = (
                 session.query(Journal)
                 .filter_by(id=journal_id, user_id=user_id)
                 .options(joinedload(Journal.category))
                 .first()
             )
+            if journal is None:
+                return jsonify({"error": "No such journal"}), 404
             message = {
                 "id": journal.id,
                 "title": journal.title,

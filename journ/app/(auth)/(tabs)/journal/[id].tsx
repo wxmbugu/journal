@@ -14,11 +14,12 @@ import createAxiosInstance from '../../../axios'
 import { useSession } from '../../../ctx'
 import { Picker } from '@react-native-picker/picker'
 import { useLocalSearchParams } from 'expo-router'
+
 export default function Journal() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const { session } = useSession()
   const axiosInstance = createAxiosInstance(session)
-  const [journalId, setJournalId] = useState('')
+  const [journalId, setJournalId] = useState(id)
   const [deleted, setDeleted] = useState(false)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -29,12 +30,17 @@ export default function Journal() {
   const [showDelete, setShowDelete] = useState(false)
 
   useEffect(() => {
-    fetchJournal()
+    if (journalId) {
+      fetchJournal()
+    }
     fetchCategories()
   }, [journalId])
+
   useEffect(() => {
     setJournalId(id)
+    setDeleted(false)
   }, [id])
+
   const fetchJournal = async () => {
     try {
       const response = await axiosInstance.get(`/api/v1/journal/${journalId}`)
@@ -43,8 +49,10 @@ export default function Journal() {
       setContent(content)
       setCategory_id(category_id)
       fetchCategoryName(category_id)
+      setDeleted(false)
     } catch (error) {
       console.error('Error fetching journal:', error)
+      setDeleted(true)
     }
   }
 
@@ -52,7 +60,6 @@ export default function Journal() {
     try {
       const response = await axiosInstance.get('/api/v1/journal/category')
       setCategories(response.data.message)
-      // Fetch category name only if category_id is set initially
       if (category_id) {
         fetchCategoryName(category_id)
       }

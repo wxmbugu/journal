@@ -11,14 +11,14 @@ import createAxiosInstance from '../app/axios'
 import { Link } from 'expo-router'
 import { useSession } from '../app/ctx'
 
-const JournalList = ({ refreshJournals }) => {
+const JournalList = () => {
   const { session } = useSession()
   const axiosInstance = createAxiosInstance(session)
   const [journals, setJournals] = useState([])
 
   useEffect(() => {
     fetchJournals()
-  }, [refreshJournals])
+  })
 
   const fetchJournals = async () => {
     try {

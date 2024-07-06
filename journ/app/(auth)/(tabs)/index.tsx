@@ -68,8 +68,6 @@ export default function Index() {
       setContent('')
       setCategoryId(null)
       toggleForm()
-
-      refreshJournals()
     } catch (error) {
       console.error('Error creating journal:', error)
     }
@@ -88,10 +86,9 @@ export default function Index() {
       )
 
       console.log('Category created:', response.data)
-      const newId = response.data.id
       setNewCategory('')
       setIsCategoryFormVisible(false)
-      fetchCategories() // Refresh categories after creating a new one
+      fetchCategories()
     } catch (error) {
       console.error('Error creating category:', error)
     }
@@ -114,7 +111,7 @@ export default function Index() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : null}
     >
-      <JournalList refreshJournals={fetchCategories} />
+      <JournalList />
 
       <TouchableOpacity style={styles.createButton} onPress={toggleForm}>
         <Ionicons name='add-circle-outline' size={32} color='#007AFF' />

@@ -180,6 +180,7 @@ class Users:
             return jsonify({"error": error_messages}), 400
         email = validated_data["email"]
         username = validated_data["username"]
+        contact = validated_data["phone_number"]
         password = validated_data["password"]
         password_hash = bcrypt.generate_password_hash(password)
         code = verification_code()
@@ -189,6 +190,7 @@ class Users:
             email=email,
             username=username,
             hash_password=password_hash,
+            contact=contact,
             activation_key=code,
             activation_date_created=datetime.fromtimestamp(time.time()),
         )
@@ -282,12 +284,10 @@ class Users:
                 return jsonify(message), 401
             else:
                 message = {
-                    "message": {
-                        "email": user.email,
-                        "username": user.username,
-                        "phone_number": user.contact,
-                        "date_created": user.created_date,
-                    }
+                    "email": user.email,
+                    "username": user.username,
+                    "phone_number": user.contact,
+                    "date_created": user.created_date,
                 }
                 return jsonify(message), 200
         finally:

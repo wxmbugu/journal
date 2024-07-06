@@ -23,8 +23,6 @@ const createAxiosInstance = (session: any) => {
     },
     async (error) => {
       if (error.response && error.response.status === 401) {
-        // Handle 401 Unauthorized error, e.g., redirect to login page
-        // Replace '/login' with your actual login route
         router.replace('/login')
       }
       return Promise.reject(error)
