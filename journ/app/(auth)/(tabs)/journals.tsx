@@ -10,6 +10,7 @@ export default function JournalSummary() {
   const [journals, setJournals] = useState([])
   const [period, setPeriod] = useState('daily')
   const [summary, setSummary] = useState([])
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchJournals()
@@ -24,7 +25,29 @@ export default function JournalSummary() {
       const response = await axiosInstance.get('/api/v1/journal')
       setJournals(response.data.message)
     } catch (error) {
-      console.error('Error fetching journals:', error)
+      handleFetchError(error)
+    }
+  }
+
+  const handleFetchError = (error) => {
+    if (error.response && error.response.data) {
+      const errorData = error.response.data
+      const fetchError = {}
+
+      if (typeof errorData.error === 'string') {
+        fetchError.general = errorData.error
+      } else {
+        for (const key in errorData.error) {
+          if (Array.isArray(errorData.error[key])) {
+            fetchError[key] = errorData.error[key].join(' ')
+          } else {
+            fetchError[key] = errorData.error[key]
+          }
+        }
+      }
+      setError(fetchError)
+    } else {
+      setError({ general: 'An error occurred. Please try again.' })
     }
   }
 
@@ -71,6 +94,9 @@ export default function JournalSummary() {
         <Picker.Item label='Weekly' value='weekly' />
         <Picker.Item label='Monthly' value='monthly' />
       </Picker>
+      {error && error.general && (
+        <Text style={styles.error}>{error.general}</Text>
+      )}
       <ScrollView style={styles.scrollView}>
         <View style={styles.summaryContainer}>
           {summary.map(([key, entries]) => (
@@ -133,5 +159,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  error: {
+    color: 'red',
+    marginBottom: 10,
+  },
 })
-

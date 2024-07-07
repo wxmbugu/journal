@@ -28,6 +28,7 @@ export default function Journal() {
   const [isUpdating, setIsUpdating] = useState(false)
   const [categories, setCategories] = useState([])
   const [showDelete, setShowDelete] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     if (journalId) {
@@ -51,7 +52,7 @@ export default function Journal() {
       fetchCategoryName(category_id)
       setDeleted(false)
     } catch (error) {
-      console.error('Error fetching journal:', error)
+      handleError(error)
       setDeleted(true)
     }
   }
@@ -64,7 +65,7 @@ export default function Journal() {
         fetchCategoryName(category_id)
       }
     } catch (error) {
-      console.error('Error fetching categories:', error)
+      handleError(error)
     }
   }
 
@@ -87,8 +88,29 @@ export default function Journal() {
       }
     } catch (error) {
       setIsUpdating(false)
-      console.error('Error updating journal:', error)
-      Alert.alert('Error', 'There was an error updating the journal.')
+      handleError(error)
+    }
+  }
+
+  const handleError = (error) => {
+    if (error.response && error.response.data) {
+      const errorData = error.response.data
+      const fetchError = {}
+
+      if (typeof errorData.error === 'string') {
+        fetchError.general = errorData.error
+      } else {
+        for (const key in errorData.error) {
+          if (Array.isArray(errorData.error[key])) {
+            fetchError[key] = errorData.error[key].join(' ')
+          } else {
+            fetchError[key] = errorData.error[key]
+          }
+        }
+      }
+      setError(fetchError)
+    } else {
+      setError({ general: 'An error occurred. Please try again.' })
     }
   }
 
@@ -113,8 +135,7 @@ export default function Journal() {
       Alert.alert('Success', 'Journal deleted successfully.')
       setDeleted(true)
     } catch (error) {
-      console.error('Error deleting journal:', error)
-      Alert.alert('Error', 'There was an error deleting the journal.')
+      handleError(error)
     }
   }
 
@@ -157,6 +178,9 @@ export default function Journal() {
           value={title}
           onChangeText={handleTitleChange}
         />
+        {error && error.title && (
+          <Text style={styles.errorText}>{error.title}</Text>
+        )}
         <Text style={styles.label}>Content</Text>
         <TextInput
           style={[styles.input, styles.contentInput]}
@@ -166,6 +190,9 @@ export default function Journal() {
           numberOfLines={6}
           textAlignVertical='top'
         />
+        {error && error.content && (
+          <Text style={styles.errorText}>{error.content}</Text>
+        )}
         <Text style={styles.label}>Category</Text>
         <Text style={styles.categoryText}>{categoryName}</Text>
         <Picker
@@ -177,8 +204,14 @@ export default function Journal() {
             <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
           ))}
         </Picker>
+        {error && error.category_id && (
+          <Text style={styles.errorText}>{error.category_id}</Text>
+        )}
         {isUpdating && <Text style={styles.updatingText}>Updating...</Text>}
       </View>
+      {error && error.general && (
+        <Text style={styles.errorText}>{error.general}</Text>
+      )}
     </KeyboardAvoidingView>
   )
 }
@@ -274,6 +307,10 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 16,
+    marginBottom: 10,
+  },
+  errorText: {
+    color: 'red',
     marginBottom: 10,
   },
 })

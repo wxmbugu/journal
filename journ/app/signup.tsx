@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button, StyleSheet, TextInput, View, Text } from 'react-native'
 import { ThemedText } from '@/components/ThemedText'
 import { Formik } from 'formik'
@@ -22,7 +22,9 @@ const SignupSchema = Yup.object().shape({
 
 export default function Signup() {
   const { signIn } = useSession()
-  const handleSignup = async (values: any) => {
+  const [signupErrors, setSignupErrors] = useState({})
+
+  const handleSignup = async (values) => {
     const { confirm_password, ...signupData } = values
 
     try {
@@ -42,10 +44,24 @@ export default function Signup() {
         signIn(data.user)
         router.replace('/')
       } else {
-        console.error('Signup failed')
+        const errorData = await response.json()
+        const errors = {}
+        if (typeof errorData.error === 'string') {
+          errors.general = errorData.error
+        } else {
+          for (const key in errorData.error) {
+            if (Array.isArray(errorData.error[key])) {
+              errors[key] = errorData.error[key].join(' ')
+            } else {
+              errors[key] = errorData.error[key]
+            }
+          }
+        }
+        setSignupErrors(errors)
       }
     } catch (error) {
       console.error('An error occurred:', error)
+      setSignupErrors({ general: 'An error occurred. Please try again.' })
     }
   }
 
@@ -81,6 +97,9 @@ export default function Signup() {
             {errors.email && touched.email && (
               <Text style={styles.error}>{errors.email}</Text>
             )}
+            {signupErrors.email && (
+              <Text style={styles.error}>{signupErrors.email}</Text>
+            )}
             <TextInput
               style={styles.input}
               placeholder='Username'
@@ -91,6 +110,9 @@ export default function Signup() {
             {errors.username && touched.username && (
               <Text style={styles.error}>{errors.username}</Text>
             )}
+            {signupErrors.username && (
+              <Text style={styles.error}>{signupErrors.username}</Text>
+            )}
             <TextInput
               style={styles.input}
               placeholder='Phone Number'
@@ -100,6 +122,9 @@ export default function Signup() {
             />
             {errors.phone_number && touched.phone_number && (
               <Text style={styles.error}>{errors.phone_number}</Text>
+            )}
+            {signupErrors.phone_number && (
+              <Text style={styles.error}>{signupErrors.phone_number}</Text>
             )}
             <TextInput
               style={styles.input}
@@ -112,6 +137,9 @@ export default function Signup() {
             {errors.password && touched.password && (
               <Text style={styles.error}>{errors.password}</Text>
             )}
+            {signupErrors.password && (
+              <Text style={styles.error}>{signupErrors.password}</Text>
+            )}
             <TextInput
               style={styles.input}
               placeholder='Confirm Password'
@@ -122,6 +150,12 @@ export default function Signup() {
             />
             {errors.confirm_password && touched.confirm_password && (
               <Text style={styles.error}>{errors.confirm_password}</Text>
+            )}
+            {signupErrors.confirm_password && (
+              <Text style={styles.error}>{signupErrors.confirm_password}</Text>
+            )}
+            {signupErrors.general && (
+              <Text style={styles.error}>{signupErrors.general}</Text>
             )}
             <Button onPress={handleSubmit} title='Signup' />
           </>

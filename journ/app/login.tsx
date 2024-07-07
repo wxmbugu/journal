@@ -1,8 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button, StyleSheet, TextInput, View, Text } from 'react-native'
 
 import { Formik } from 'formik'
-import { ThemedText } from '@/components/ThemedText'
 import * as Yup from 'yup'
 import { useSession } from './ctx'
 import { router, Link } from 'expo-router'
@@ -16,6 +15,7 @@ const LoginSchema = Yup.object().shape({
 
 export default function Login() {
   const { signIn } = useSession()
+  const [loginErrors, setLoginErrors] = useState({})
 
   const handleLogin = async (values) => {
     try {
@@ -35,10 +35,26 @@ export default function Login() {
         signIn(data)
         router.replace('/')
       } else {
-        console.error('Login failed')
+        const errorData = await response.json()
+        console.log('Backend error message:', errorData)
+
+        const errors = {}
+        if (typeof errorData.error === 'string') {
+          errors.general = errorData.error
+        } else {
+          for (const key in errorData.error) {
+            if (Array.isArray(errorData.error[key])) {
+              errors[key] = errorData.error[key].join(' ')
+            } else {
+              errors[key] = errorData.error[key]
+            }
+          }
+        }
+        setLoginErrors(errors)
       }
     } catch (error) {
       console.error('An error occurred:', error)
+      setLoginErrors({ general: 'An error occurred. Please try again.' })
     }
   }
 
@@ -68,6 +84,9 @@ export default function Login() {
             {errors.email && touched.email && (
               <Text style={styles.error}>{errors.email}</Text>
             )}
+            {loginErrors.email && (
+              <Text style={styles.error}>{loginErrors.email}</Text>
+            )}
             <TextInput
               style={styles.input}
               placeholder='Password'
@@ -79,16 +98,22 @@ export default function Login() {
             {errors.password && touched.password && (
               <Text style={styles.error}>{errors.password}</Text>
             )}
+            {loginErrors.password && (
+              <Text style={styles.error}>{loginErrors.password}</Text>
+            )}
+            {loginErrors.general && (
+              <Text style={styles.error}>{loginErrors.general}</Text>
+            )}
             <Button onPress={handleSubmit} title='Login' />
           </>
         )}
       </Formik>
-      <ThemedText>
+      <Text>
         Don't have an account?{' '}
         <Link href='/signup' style={styles.link}>
           Signup
         </Link>
-      </ThemedText>
+      </Text>
     </View>
   )
 }

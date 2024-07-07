@@ -183,28 +183,18 @@ class Users:
         contact = validated_data["phone_number"]
         password = validated_data["password"]
         password_hash = bcrypt.generate_password_hash(password)
-        code = verification_code()
-        encrypted_code = encode_verification_key(code)
-        verification_link = verification_link_builder(encrypted_code.decode())
         user = User(
             email=email,
             username=username,
             hash_password=password_hash,
             contact=contact,
-            activation_key=code,
             activation_date_created=datetime.fromtimestamp(time.time()),
         )
         try:
             session.add(user)
             session.commit()
-            email_worker = Worker(
-                callback_fn=lambda: send_account_verification_emails(
-                    user.email, user.username, verification_link
-                )
-            )
-            email_worker.start()
             message = {
-                "message": "Creation of Account was successful,check your email to verify your account",
+                "message": "Creation of Account was successful",
             }
             return jsonify(message), 201
         except IntegrityError as e:
@@ -216,7 +206,6 @@ class Users:
         finally:
             session.close()
 
-    # All users reset password
     def password_reset(self, email):
         data = request.get_json()
         validated_data, error_messages = (

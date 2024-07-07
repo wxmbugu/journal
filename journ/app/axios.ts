@@ -3,7 +3,7 @@ import { router } from 'expo-router'
 
 const createAxiosInstance = (session: any) => {
   const axiosInstance = axios.create({
-    baseURL: 'http://192.168.100.101:5000/', // Replace with your API base URL
+    baseURL: 'http://192.168.100.101:5000/',
   })
 
   axiosInstance.interceptors.request.use(

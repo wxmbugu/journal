@@ -8,19 +8,16 @@ from flask_jwt_extended import jwt_required
 bp = Blueprint("auth", __name__)
 
 
-# Customer register
 @bp.route("/signup", methods=["POST"])
 def register():
     return Users().register()
 
 
-# Customer login
 @bp.route("/login", methods=["POST"])
 def login():
     return Users().login()
 
 
-# All users reset password
 @bp.route("/reset_password", methods=["POST"])
 @jwt_required(optional=False)
 def password_reset():
